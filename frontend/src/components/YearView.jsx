@@ -7,44 +7,74 @@ export default function YearView({ currentDate, eventsForDay, isToday, openDay, 
   const maxDays = 31;
 
   return (
-    <div className="yv">
-      <div className="mcol">
-        {MONTHS_SHORT.map((month, index) => (
-          <div key={month} className="mhdr" onClick={() => jumpMonth(index)}>
-            {month}
+    <div className="year-page">
+      <section className="year-header">
+        <div className="year-title-block">
+          <div className="year-number">{year}</div>
+          <div className="year-title">Yearly Goals</div>
+
+          <div className="mindset-title">This Year’s Mindset</div>
+        </div>
+
+        <div className="goals-area">
+          <div className="goals-prompt">What do you want to achieve this year?</div>
+
+          <div className="goal-check-grid">
+            {Array.from({ length: 10 }, (_, index) => (
+              <label key={index} className="goal-check">
+                <input type="checkbox" />
+                <span />
+              </label>
+            ))}
           </div>
-        ))}
-      </div>
 
-      <div className="dgrid">
-        {Array.from({ length: 12 }, (_, month) => {
-          const daysInMonth = new Date(year, month + 1, 0).getDate();
+          <div className="mindset-line" />
+        </div>
+      </section>
 
-          return (
-            <div className="mrow" key={month}>
-              {Array.from({ length: maxDays }, (_, dayIndex) => {
-                const day = dayIndex + 1;
+      <section className="year-calendar">
+        <div className="month-labels">
+          {MONTHS_SHORT.map((month, index) => (
+            <button
+              key={month}
+              className="month-label"
+              onClick={() => jumpMonth(index)}
+            >
+              {month}
+            </button>
+          ))}
+        </div>
 
-                if (day > daysInMonth) {
-                  return <div key={day} className="dc empty" />;
-                }
+        <div className="year-grid">
+          {Array.from({ length: 12 }, (_, month) => {
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-                const hasEvent = eventsForDay(year, month, day).length > 0;
+            return (
+              <div className="year-row" key={month}>
+                {Array.from({ length: maxDays }, (_, dayIndex) => {
+                  const day = dayIndex + 1;
 
-                return (
-                  <div
-                    key={day}
-                    className={`dc ${isToday(year, month, day) ? 'td' : ''} ${hasEvent ? 'ev' : ''}`}
-                    onClick={() => openDay(year, month, day)}
-                  >
-                    <span className="dn">{day}</span>
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
+                  if (day > daysInMonth) {
+                    return <div key={day} className="year-cell empty" />;
+                  }
+
+                  const hasEvent = eventsForDay(year, month, day).length > 0;
+
+                  return (
+                    <button
+                      key={day}
+                      className={`year-cell ${isToday(year, month, day) ? 'today' : ''} ${hasEvent ? 'has-event' : ''}`}
+                      onClick={() => openDay(year, month, day)}
+                    >
+                      <span className="day-number">{day}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }
