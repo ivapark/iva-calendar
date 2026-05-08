@@ -1,0 +1,95 @@
+.yv {
+  flex: 1;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 55px minmax(0, 1fr);
+  overflow: hidden;
+  min-height: 0;
+}
+
+.mcol {
+  border-right: 1px solid var(--border);
+  display: grid;
+  grid-template-rows: repeat(12, minmax(0, 1fr));
+  min-height: 0;
+  background: var(--bg);
+}
+
+.mhdr {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: .12s;
+  min-height: 0;
+}
+
+.mhdr:hover {
+  color: var(--accent);
+  background: var(--hl);
+}
+
+.dgrid {
+  overflow: auto;
+  display: grid;
+  grid-template-rows: repeat(12, minmax(0, 1fr));
+  min-height: 0;
+}
+
+.mrow {
+  display: grid;
+  grid-template-columns: repeat(31, minmax(34px, 1fr));
+  border-bottom: 1px solid var(--border);
+  min-height: 0;
+}
+
+.dc {
+  min-width: 34px;
+  display: flex;
+  align-items: flex-start;
+  padding: 3px 4px;
+  cursor: pointer;
+  position: relative;
+  transition: .1s;
+}
+
+.dc.empty {
+  opacity: .1;
+  cursor: default;
+}
+
+.dc:hover {
+  background: var(--hl);
+}
+
+.dc.td .dn {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  width: 17px;
+  height: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dc.ev::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ev);
+}
+
+.dn {
+  font-size: 9px;
+  color: var(--muted);
+}

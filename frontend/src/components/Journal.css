@@ -1,0 +1,2 @@
+.jarea{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.jtx{width:100%;flex:1;border:none;background:transparent;resize:none;padding:10px 13px;font-size:11px;line-height:1.85;font-family:'DM Sans',sans-serif;color:var(--accent);outline:none}

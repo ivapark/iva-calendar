@@ -1,0 +1,12 @@
+.mv{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.mnav{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.mname{font-family:var(--serif);font-size:18px}
+.wdrow{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border);flex-shrink:0}
+.wd{text-align:center;font-size:10px;color:var(--muted);font-weight:500;padding:5px 0}
+.mgrid{flex:1;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(6,1fr);overflow:hidden}
+.mc{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:5px 7px;cursor:pointer;transition:.1s;overflow:hidden;display:flex;flex-direction:column}
+.mc:hover{background:var(--hl)}
+.mc.om .mdn{color:#ccc}
+.mc.tc .mdn span{background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center}
+.mdn{font-size:11px;font-weight:500;line-height:1;margin-bottom:3px}
+.mev{font-size:9px;background:var(--ev-bg);color:var(--ev);border-radius:3px;padding:1px 4px;margin-bottom:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
