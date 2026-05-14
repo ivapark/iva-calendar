@@ -1,12 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { api } from './api.js';
 import { dateKey } from './utils.js';
+
 
 import YearView from './components/YearView.jsx';
 import MonthView from './components/MonthView.jsx';
 import WeekView from './components/WeekView.jsx';
 import DayView from './components/DayView.jsx';
+import JournalView from './components/JournalView.jsx';
+
+
+import chatIcon from './assets/ChatIcon.svg';
+import journalIcon from './assets/JournalIcon.svg';
+import searchIcon from './assets/SearchIcon.svg';
+import settingIcon from './assets/SettingIcon.svg';
 
 import './styles.css';
 
@@ -114,6 +122,11 @@ function App() {
     setModalOpen(true);
   }
 
+  function goToday() {
+    setCurrentDate(new Date(today));
+    setView('month');
+  }
+
   async function saveEvent(form) {
     if (modalEvent) {
       const updated = await api.updateEvent(modalEvent.id, form);
@@ -134,6 +147,18 @@ function App() {
 
     setEvents((prev) => prev.filter((event) => event.id !== id));
     setModalOpen(false);
+  }
+
+  async function updateTodo(todo, nextText) {
+    const updated = await api.updateTodo(todo.id, {
+      text: nextText,
+    });
+
+    setTodos((prev) =>
+      prev.map((item) =>
+        item.id === todo.id ? { ...item, text: updated.text } : item
+      )
+    );
   }
 
   async function addTodo(date, text) {
@@ -172,6 +197,117 @@ function App() {
     await api.saveEntry(type, key, value);
   }
 
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setSearchOpen] = useState(false);
+
+  const searchResults = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    if (!query) return [];
+
+    const results = [];
+
+    events.forEach((event) => {
+      const haystack = `${event.title || ''} ${event.note || ''}`.toLowerCase();
+
+      if (haystack.includes(query)) {
+        results.push({
+          id: `event-${event.id}`,
+          type: 'Event',
+          title: event.title || 'Untitled event',
+          subtitle: event.date,
+          date: event.date,
+          view: 'day',
+        });
+      }
+    });
+
+    todos.forEach((todo) => {
+      const haystack = `${todo.text || ''}`.toLowerCase();
+
+      if (haystack.includes(query)) {
+        results.push({
+          id: `todo-${todo.id}`,
+          type: 'Todo',
+          title: todo.text || 'Untitled todo',
+          subtitle: todo.date,
+          date: todo.date,
+          view: 'day',
+        });
+      }
+    });
+
+    Object.entries(journals).forEach(([key, value]) => {
+      const haystack = `${value || ''}`.toLowerCase();
+
+      if (haystack.includes(query)) {
+        results.push({
+          id: `journal-${key}`,
+          type: 'Journal',
+          title: getPreviewText(value),
+          subtitle: key,
+          key,
+          view: guessViewFromKey(key),
+        });
+      }
+    });
+
+    Object.entries(goals).forEach(([key, value]) => {
+      const matches = getGoalMatches(value, query);
+
+      matches.forEach((match, index) => {
+        results.push({
+          id: `goal-${key}-${index}`,
+          type: 'Goal',
+          title: match,
+          subtitle: key,
+          key,
+          view: guessViewFromKey(key),
+        });
+      });
+    });
+
+    Object.entries(mindsets).forEach(([key, value]) => {
+      const haystack = `${value || ''}`.toLowerCase();
+
+      if (haystack.includes(query)) {
+        results.push({
+          id: `mindset-${key}`,
+          type: 'Mindset',
+          title: value || 'Mindset',
+          subtitle: key,
+          key,
+          view: guessViewFromKey(key),
+        });
+      }
+    });
+
+    return results.slice(0, 12);
+  }, [searchQuery, events, todos, journals, goals, mindsets]);
+
+  function openSearchResult(result) {
+    if (result.date) {
+      const parsedDate = parseDateString(result.date);
+
+      if (parsedDate) {
+        setCurrentDate(parsedDate);
+        setView('day');
+      }
+    } else if (result.key) {
+      const target = parseScopeKey(result.key);
+
+      if (target) {
+        setCurrentDate(target.date);
+        setView(target.view);
+      } else {
+        setView(result.view || 'year');
+      }
+    }
+
+    setSearchOpen(false);
+    setSearchQuery('');
+  }
   if (loading) {
     return <div className="loading">Loading calendar...</div>;
   }
@@ -182,12 +318,14 @@ function App() {
         <div />
 
         <div className="top-actions">
-          <button
-            className="todaybtn"
-            onClick={() => setCurrentDate(new Date(today))}
-          >
-            Today
-          </button>
+          <SearchBar
+            query={searchQuery}
+            setQuery={setSearchQuery}
+            isOpen={isSearchOpen}
+            setOpen={setSearchOpen}
+            results={searchResults}
+            onSelect={openSearchResult}
+          />
 
           <button
             className="iconbtn"
@@ -200,19 +338,18 @@ function App() {
           <button
             className="iconbtn"
             onClick={() => {
-              setView('day');
-              setPanel('journal');
+              setView('journal');
             }}
             title="Journal"
           >
-            📝
+            <img className="top-icon" src={journalIcon} alt="" />
           </button>
 
           <button
             className="iconbtn"
             title="Chat"
           >
-            💬
+            <img className="top-icon" src={chatIcon} alt="" />
           </button>
 
           <button
@@ -220,7 +357,7 @@ function App() {
             onClick={() => alert('Settings coming soon!')}
             title="Settings"
           >
-            ⚙
+            <img className="top-icon setting-icon" src={settingIcon} alt="" />
           </button>
 
           <div className="view-tabs">
@@ -248,6 +385,9 @@ function App() {
               isToday={isToday}
               openDay={openDay}
               jumpMonth={jumpMonth}
+              goals={goals}
+              mindsets={mindsets}
+              saveEntry={saveEntry}
             />
           )}
 
@@ -258,6 +398,10 @@ function App() {
               isToday={isToday}
               openDay={openDay}
               navigate={navigate}
+              goToday={goToday}
+              goals={goals}
+              mindsets={mindsets}
+              saveEntry={saveEntry}
             />
           )}
 
@@ -265,10 +409,23 @@ function App() {
             <WeekView
               currentDate={currentDate}
               eventsForDay={eventsForDay}
+              todosForDay={todosForDay}
               isToday={isToday}
               openDay={openDay}
               openEditEvent={openEditEvent}
               openAddEvent={openAddEvent}
+              navigate={navigate}
+              goToday={() => {
+                setCurrentDate(new Date(today));
+                setView('week');
+              }}
+              goals={goals}
+              mindsets={mindsets}
+              saveEntry={saveEntry}
+              addTodo={addTodo}
+              updateTodo={updateTodo}
+              toggleTodo={toggleTodo}
+              deleteTodo={deleteTodo}
             />
           )}
 
@@ -277,21 +434,40 @@ function App() {
               currentDate={currentDate}
               eventsForDay={eventsForDay}
               todosForDay={todosForDay}
-              panel={panel}
-              setPanel={setPanel}
               openEditEvent={openEditEvent}
               openAddEvent={openAddEvent}
               addTodo={addTodo}
+              updateTodo={updateTodo}
               toggleTodo={toggleTodo}
               deleteTodo={deleteTodo}
               journals={journals}
               goals={goals}
               saveEntry={saveEntry}
+              navigate={navigate}
+              goToday={() => {
+                setCurrentDate(new Date(today));
+                setView('day');
+              }}
+            />
+          )}
+
+          {view === 'journal' && (
+            <JournalView
+              currentDate={currentDate}
+              setCurrentDate={setCurrentDate}
+              journals={journals}
+              saveEntry={saveEntry}
+              navigate={navigate}
+              goToday={() => {
+                const todayDate = new Date(today);
+                setCurrentDate(todayDate);
+                setView('journal');
+              }}
             />
           )}
         </div>
       </div>
-
+      
       {isModalOpen && (
         <EventModal
           event={modalEvent}
@@ -306,6 +482,138 @@ function App() {
   );
 }
 
+function SearchBar({ query, setQuery, isOpen, setOpen, results, onSelect }) {
+  return (
+    <div className="search-wrap">
+      <img className="search-icon" src={searchIcon} alt="" />
+
+      <input
+        className="search-input"
+        value={query}
+        placeholder="Search"
+        onFocus={() => setOpen(true)}
+        onChange={(event) => {
+          setQuery(event.target.value);
+          setOpen(true);
+        }}
+      />
+
+      {isOpen && query.trim() && (
+        <div className="search-popover">
+          {results.length > 0 ? (
+            results.map((result) => (
+              <button
+                key={result.id}
+                className="search-result"
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  onSelect(result);
+                }}
+              >
+                <span className="search-result-type">{result.type}</span>
+                <span className="search-result-title">{result.title}</span>
+                <span className="search-result-subtitle">{result.subtitle}</span>
+              </button>
+            ))
+          ) : (
+            <div className="search-empty">No results found</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function getPreviewText(value) {
+  const text = String(value || '').trim();
+
+  if (!text) return 'Untitled';
+
+  return text.length > 48 ? `${text.slice(0, 48)}...` : text;
+}
+
+function getGoalMatches(value, query) {
+  if (!value) return [];
+
+  try {
+    const parsed = JSON.parse(value);
+
+    if (Array.isArray(parsed)) {
+      return parsed
+        .map((item) => item?.text || '')
+        .filter((text) => text.toLowerCase().includes(query));
+    }
+  } catch {
+    // If value is not JSON, search it as plain text.
+  }
+
+  const text = String(value);
+
+  return text.toLowerCase().includes(query) ? [getPreviewText(text)] : [];
+}
+
+function parseDateString(dateString) {
+  if (!dateString) return null;
+
+  const parts = dateString.split('-').map(Number);
+
+  if (parts.length !== 3) return null;
+
+  const [year, month, day] = parts;
+
+  if (!year || !month || !day) return null;
+
+  return new Date(year, month - 1, day);
+}
+
+function guessViewFromKey(key) {
+  if (key.startsWith('year-')) return 'year';
+  if (key.startsWith('month-')) return 'month';
+  if (key.startsWith('week-')) return 'week';
+
+  if (/^\d{4}-\d{2}-\d{2}/.test(key)) return 'day';
+
+  return 'year';
+}
+
+function parseScopeKey(key) {
+  if (key.startsWith('year-')) {
+    const year = Number(key.split('-')[1]);
+
+    if (!Number.isNaN(year)) {
+      return {
+        view: 'year',
+        date: new Date(year, 0, 1),
+      };
+    }
+  }
+
+  if (key.startsWith('month-')) {
+    const parts = key.split('-');
+    const year = Number(parts[1]);
+    const month = Number(parts[2]);
+
+    if (!Number.isNaN(year) && !Number.isNaN(month)) {
+      return {
+        view: 'month',
+        date: new Date(year, month, 1),
+      };
+    }
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}/.test(key)) {
+    const date = parseDateString(key.slice(0, 10));
+
+    if (date) {
+      return {
+        view: 'day',
+        date,
+      };
+    }
+  }
+
+  return null;
+}
 function EventModal({ event, defaults = {}, currentDate, onClose, onSave, onDelete }) {
   const defaultDate = dateKey(
     currentDate.getFullYear(),

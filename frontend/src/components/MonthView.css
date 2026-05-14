@@ -1,12 +1,381 @@
-.mv{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.mnav{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
-.mname{font-family:var(--serif);font-size:18px}
-.wdrow{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border);flex-shrink:0}
-.wd{text-align:center;font-size:10px;color:var(--muted);font-weight:500;padding:5px 0}
-.mgrid{flex:1;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(6,1fr);overflow:hidden}
-.mc{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:5px 7px;cursor:pointer;transition:.1s;overflow:hidden;display:flex;flex-direction:column}
-.mc:hover{background:var(--hl)}
-.mc.om .mdn{color:#ccc}
-.mc.tc .mdn span{background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center}
-.mdn{font-size:11px;font-weight:500;line-height:1;margin-bottom:3px}
-.mev{font-size:9px;background:var(--ev-bg);color:var(--ev);border-radius:3px;padding:1px 4px;margin-bottom:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.month-page {
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: #ffffff;
+  display: grid;
+  grid-template-rows: 153px minmax(0, 1fr);
+  padding: 34px 32px 45px 32px;
+  font-family: Inter, 'DM Sans', sans-serif;
+}
+
+/* Header */
+
+.month-header {
+  position: relative;
+  min-height: 130px;
+}
+
+/* Hide old title block because this design uses month nav as the title */
+.month-left {
+  display: none;
+}
+
+.month-goals-area {
+  position: absolute;
+  left: 368px;
+  top: 27px;
+  width: 560px;
+}
+
+.month-goals-prompt {
+  font-size: 12px;
+  line-height: 15px;
+  color: #878787;
+  margin-bottom: 14px;
+  font-weight: 400;
+}
+
+.month-goal-check-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 170px);
+  grid-auto-rows: 32px;
+  row-gap: 8px;
+  column-gap: 26px;
+  width: fit-content;
+}
+
+.month-goal-check {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: start;
+  column-gap: 10px;
+  min-width: 0;
+  height: 44px;
+}
+
+.month-goal-check input[type='checkbox'] {
+  display: none;
+}
+
+.month-fake-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 0.5px solid #ababab;
+  border-radius: 4px;
+  background: #ffffff;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.month-goal-check input[type='checkbox']:checked + .month-fake-checkbox {
+  background: #9caaf9;
+  border-color: #9caaf9;
+}
+
+.month-goal-text-input {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  max-height: 40px;
+  border: none;
+  background: transparent;
+  outline: none;
+  resize: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  font-size: 10px;
+  line-height: 20px;
+  color: #565151;
+  padding: 0;
+  font-family: Inter, 'DM Sans', sans-serif;
+  scrollbar-width: thin;
+}
+
+.month-goal-text-input::placeholder {
+  color: transparent;
+}
+
+.month-goal-check:focus-within .month-goal-text-input::placeholder {
+  color: #ababab;
+}
+
+.month-goal-text-input::-webkit-scrollbar {
+  width: 4px;
+}
+
+.month-goal-text-input::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 999px;
+}
+
+.month-goal-text-input::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.month-mindset-title {
+  position: absolute;
+  left: 368px;
+  top: 2px;
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: 400;
+  color: #878787;
+  white-space: nowrap;
+}
+
+.month-mindset-input {
+  position: absolute;
+  left: 508px;
+  top: 0;
+  width: 384px;
+  min-height: 20px;
+  max-height: 40px;
+  border: none;
+  border-bottom: 1px solid rgba(217, 217, 217, 0.9);
+  background: transparent;
+  outline: none;
+  resize: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  font-size: 12px;
+  line-height: 20px;
+  color: #565151;
+  padding: 0 0 3px;
+  font-family: Inter, 'DM Sans', sans-serif;
+  scrollbar-width: thin;
+}
+
+.month-mindset-input::placeholder {
+  color: transparent;
+}
+
+.month-mindset-input:focus::placeholder {
+  color: #ababab;
+}
+
+.month-mindset-input::-webkit-scrollbar {
+  width: 4px;
+}
+
+.month-mindset-input::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 999px;
+}
+
+.month-mindset-input::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Calendar section */
+
+.month-calendar-section {
+  min-height: 0;
+  position: relative;
+  height: 100%;
+  display: block;
+}
+
+/* Month nav stays positioned in the upper-left */
+.month-nav {
+  position: absolute;
+  left: 0;
+  top: -153px;
+  height: 32px;
+  display: grid;
+  grid-template-columns: 24px 145px 24px 74px;
+  align-items: center;
+  column-gap: 12px;
+  width: fit-content;
+  z-index: 5;
+}
+
+.month-grid {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: repeat(6, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid #f0f2f6;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.month-arrow {
+  border: none;
+  background: transparent;
+  color: #ffbca0;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.month-name-large {
+  width: 145px;
+  font-size: 24px;
+  line-height: 29px;
+  color: #878787;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.month-today-btn {
+  width: 67px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #878787;
+  font-size: 16px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.month-today-btn:hover {
+  background: #f0f2f6;
+}
+
+/* Grid */
+
+.month-grid {
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: repeat(6, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid #f0f2f6;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.month-cell {
+  border: none;
+  border-right: 1px solid #f0f2f6;
+  border-bottom: 1px solid #f0f2f6;
+  background: #ffffff;
+  padding: 5px 6px;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-width: 0;
+  min-height: 0;
+}
+
+.month-cell:nth-child(7n) {
+  border-right: none;
+}
+
+.month-cell:nth-last-child(-n + 7) {
+  border-bottom: none;
+}
+
+.month-cell:hover {
+  background: #f0f2f6;
+}
+
+.month-cell.outside-month {
+  background: #ffffff;
+  color: #ababab;
+}
+
+.month-day-number {
+  font-size: 8px;
+  line-height: 10px;
+  font-weight: 400;
+  color: #636363;
+  margin-bottom: 4px;
+}
+
+.month-cell.outside-month .month-day-number {
+  color: #ababab;
+}
+
+.month-cell.today-cell .month-day-number {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #9caaf9;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.month-event {
+  max-width: 100%;
+  font-size: 10px;
+  background: rgba(156, 170, 249, 0.12);
+  color: #494b7c;
+  border-radius: 4px;
+  padding: 2px 5px;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .month-page {
+    padding: 24px 20px;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .month-header {
+    min-height: 130px;
+  }
+
+  .month-goals-area,
+  .month-mindset-title,
+  .month-mindset-input {
+    position: static;
+  }
+
+  .month-goals-area {
+    margin-top: 16px;
+  }
+
+  .month-nav {
+    position: static;
+    margin-bottom: 16px;
+  }
+
+  .month-calendar-section {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .month-goal-check-grid {
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    width: 100%;
+    row-gap: 12px;
+  }
+
+  .month-mindset-input {
+    width: 100%;
+  }
+
+  .month-grid {
+    overflow-x: auto;
+    grid-template-rows: repeat(6, minmax(0, 1fr));
+  }
+
+  .month-cell {
+    min-width: 110px;
+  }
+}

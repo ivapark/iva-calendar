@@ -111,8 +111,9 @@ app.patch('/api/todos/:id', async (req, res, next) => {
     if (!existing) return res.status(404).json({ error: 'Todo not found.' });
 
     const done = typeof req.body.done === 'boolean' ? req.body.done : Boolean(existing.done);
-    await run('UPDATE todos SET done = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [done ? 1 : 0, req.params.id]);
-    res.json({ ...existing, done });
+    const text = typeof req.body.text === 'string' && req.body.text.trim() ? req.body.text.trim() : existing.text;
+    await run('UPDATE todos SET text = ?, done = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [text, done ? 1 : 0, req.params.id]);
+    res.json({ ...existing, text, done });
   } catch (err) {
     next(err);
   }

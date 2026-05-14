@@ -1,19 +1,610 @@
-.wv{flex:1;display:flex;flex-direction:column;min-height:0}
-.whdr{display:grid;grid-template-columns:38px repeat(7,1fr);border-bottom:1px solid var(--border);flex-shrink:0}
-.time-label{border-right:1px solid var(--border);padding:6px 4px;font-size:8px;color:var(--muted);text-align:center}
-.wdh{padding:6px 4px;text-align:center;border-left:1px solid var(--border);cursor:pointer}
-.wdh:hover{background:var(--hl)}
-.wdn{font-size:9px;color:var(--muted);font-weight:500}
-.wdd{font-size:17px;font-weight:300;color:var(--accent);line-height:1.1}
-.wdd.tn{background:var(--accent);color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:13px}
-.wbody{flex:1;overflow-y:auto;overflow-x:hidden;min-height:0}
-.wgrid{display:grid;grid-template-columns:38px repeat(7,1fr);height:1536px}
-.tcol{display:flex;flex-direction:column;height:1536px}
-.ts{height:64px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;padding-top:2px;justify-content:flex-end;padding-right:5px}
-.tl2{font-size:8px;color:var(--muted);white-space:nowrap}
-.wdc{border-left:1px solid var(--border);position:relative;height:1536px;cursor:crosshair}
-.wdc:hover{background:rgba(0,0,0,.012)}
-.hl2{position:absolute;left:0;right:0;border-top:1px solid var(--border);pointer-events:none}
-.wev{position:absolute;left:2px;right:2px;border-radius:4px;background:var(--ev-bg);border-left:3px solid var(--ev);padding:2px 5px;cursor:pointer;overflow:hidden;z-index:1}
-.wet{font-size:9px;color:var(--ev);font-weight:500}
-.wet2{font-size:8px;color:#7f77dd}
+.week-page {
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: #ffffff;
+  display: grid;
+  grid-template-rows: 153px minmax(0, 1fr);
+  padding: 34px 32px 45px 32px;
+  font-family: Inter, 'DM Sans', sans-serif;
+}
+
+/* Header */
+
+.week-header {
+  position: relative;
+  min-height: 130px;
+}
+
+/* Hide old left title. The design uses the month nav as the main title */
+
+.week-left {
+  display: none;
+}
+
+.week-mindset-title {
+  position: absolute;
+  left: 368px;
+  top: 2px;
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: 400;
+  color: #878787;
+  white-space: nowrap;
+}
+
+.week-mindset-input {
+  position: absolute;
+  left: 508px;
+  top: 0;
+  width: 384px;
+  min-height: 20px;
+  max-height: 60px;
+  border: none;
+  border-bottom: 1px solid rgba(217, 217, 217, 0.9);
+  background: transparent;
+  outline: none;
+  resize: none;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 20px;
+  color: #565151;
+  padding: 0 0 3px;
+  font-family: Inter, 'DM Sans', sans-serif;
+}
+
+.week-mindset-input::placeholder {
+  color: transparent;
+}
+
+.week-mindset-input:focus::placeholder {
+  color: #ababab;
+}
+
+.week-goals-area {
+  position: absolute;
+  left: 368px;
+  top: 27px;
+  width: 560px;
+}
+
+.week-goals-prompt {
+  font-size: 12px;
+  line-height: 15px;
+  color: #878787;
+  margin-bottom: 14px;
+  font-weight: 400;
+}
+
+.week-goal-check-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 170px);
+  grid-auto-rows: 32px;
+  row-gap: 8px;
+  column-gap: 26px;
+  width: fit-content;
+}
+
+.week-goal-check {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: start;
+  column-gap: 10px;
+  min-width: 0;
+  height: 64px;
+}
+
+.week-goal-check input[type='checkbox'] {
+  display: none;
+}
+
+.week-fake-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 0.5px solid #ababab;
+  border-radius: 4px;
+  background: #ffffff;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.week-goal-check input[type='checkbox']:checked + .week-fake-checkbox {
+  background: #9caaf9;
+  border-color: #9caaf9;
+}
+
+.week-goal-text-input {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  max-height: 60px;
+  border: none;
+  background: transparent;
+  outline: none;
+  resize: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  font-size: 10px;
+  line-height: 20px;
+  color: #565151;
+  padding: 0;
+  font-family: Inter, 'DM Sans', sans-serif;
+  scrollbar-width: thin;
+}
+
+
+.week-goal-text-input::placeholder {
+  color: transparent;
+}
+
+.week-goal-check:focus-within .week-goal-text-input::placeholder {
+  color: #ababab;
+}
+
+/* Calendar section */
+
+.week-calendar-section {
+  min-height: 0;
+  position: relative;
+  display: grid;
+  grid-template-columns: 35px repeat(7, minmax(0, 1fr));
+  grid-template-rows: 83px minmax(0, 1fr);
+}
+
+/* Top-left month nav */
+
+.week-nav {
+  position: absolute;
+  left: 0;
+  top: -153px;
+  height: 32px;
+  display: grid;
+  grid-template-columns: 24px 145px 24px 74px;
+  align-items: center;
+  column-gap: 12px;
+  width: fit-content;
+  z-index: 5;
+}
+
+.week-arrow {
+  border: none;
+  background: transparent;
+  color: #ffbca0;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.week-month-name {
+  width: 145px;
+  font-size: 24px;
+  line-height: 29px;
+  color: #878787;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.week-today-btn {
+  width: 67px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #878787;
+  font-size: 16px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.week-today-btn:hover {
+  background: #f0f2f6;
+}
+
+/* Fixed day labels + flexible ToDos row */
+
+.week-fixed-header {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: 35px repeat(7, minmax(0, 1fr));
+  grid-template-rows: 27px 56px;
+  position: relative;
+}
+
+.week-time-spacer {
+  grid-column: 1;
+  grid-row: 1 / 3;
+}
+
+.week-fixed-day {
+  display: grid;
+  grid-template-rows: 27px 56px;
+  min-width: 0;
+}
+
+.week-fixed-day:nth-child(2) {
+  grid-column: 2;
+}
+
+.week-fixed-day:nth-child(3) {
+  grid-column: 3;
+}
+
+.week-fixed-day:nth-child(4) {
+  grid-column: 4;
+}
+
+.week-fixed-day:nth-child(5) {
+  grid-column: 5;
+}
+
+.week-fixed-day:nth-child(6) {
+  grid-column: 6;
+}
+
+.week-fixed-day:nth-child(7) {
+  grid-column: 7;
+}
+
+.week-fixed-day:nth-child(8) {
+  grid-column: 8;
+}
+
+.week-day-heading {
+  grid-row: 1;
+  border: none;
+  background: transparent;
+  color: #707070;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 400;
+  font-family: Inter, 'DM Sans', sans-serif;
+  text-align: center;
+  cursor: pointer;
+  padding: 0 0 5px;
+  align-self: end;
+  justify-self: center;
+}
+
+.week-day-heading:hover {
+  color: #494b7c;
+}
+
+.week-day-heading.is-today {
+  color: #494949;
+  background: #ffe8e8;
+  border-radius: 20px;
+  padding: 4px 10px;
+  align-self: center;
+}
+
+/* Weekly ToDos */
+
+.week-todo-box {
+  grid-row: 2;
+  height: 100%;
+  min-height: 0;
+  border: 1px solid #d6dbe6;
+  border-right: none;
+  padding: 8px 12px 6px;
+  background: #ffffff;
+  overflow-y: auto;
+}
+
+.week-fixed-day:nth-child(2) .week-todo-box {
+  border-radius: 10px 0 0 0;
+}
+
+.week-fixed-day:nth-child(8) .week-todo-box {
+  border-right: 1px solid #d6dbe6;
+  border-radius: 0 10px 0 0;
+}
+
+.week-todo-title {
+  color: #000000;
+  font-size: 10px;
+  line-height: 10px;
+  font-weight: 400;
+  margin-bottom: 10px;
+}
+
+.week-todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.week-todo-item {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) 10px;
+  align-items: start;
+  column-gap: 7px;
+  min-width: 0;
+}
+
+.week-todo-check {
+  width: 8px;
+  height: 8px;
+  border: 0.5px solid #d9d9d9;
+  background: #ffffff;
+  flex-shrink: 0;
+  margin-top: 2px;
+  cursor: pointer;
+  color: #ffffff;
+  font-size: 6px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.week-todo-check.is-done {
+  background: #494b7c;
+  border-color: #494b7c;
+}
+
+.week-todo-text {
+  border: none;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  color: #565151;
+  font-size: 10px;
+  line-height: 12px;
+  font-weight: 400;
+  font-family: Inter, 'DM Sans', sans-serif;
+  overflow: hidden;
+  white-space: normal;
+  word-break: break-word;
+  cursor: text;
+}
+
+.week-todo-text.is-done {
+  color: #ababab;
+  text-decoration: line-through;
+}
+
+.week-todo-edit-input {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  border-bottom: 1px solid #d9d9d9;
+  background: transparent;
+  outline: none;
+  color: #565151;
+  font-size: 10px;
+  line-height: 12px;
+  font-family: Inter, 'DM Sans', sans-serif;
+  padding: 0 0 1px;
+}
+
+.week-todo-delete {
+  border: none;
+  background: transparent;
+  color: #ababab;
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  padding: 0;
+  margin-top: 1px;
+}
+
+.week-todo-item:hover .week-todo-delete {
+  opacity: 1;
+}
+
+.week-todo-delete:hover {
+  color: #4c4c4c;
+}
+
+.week-todo-add {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  column-gap: 7px;
+  align-items: center;
+  width: 100%;
+}
+
+.week-todo-add-plus {
+  color: #ababab;
+  font-size: 10px;
+  line-height: 1;
+  text-align: center;
+}
+
+.week-todo-add input {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: Inter, 'DM Sans', sans-serif;
+  font-size: 10px;
+  line-height: 12px;
+  color: #565151;
+}
+
+.week-todo-add input::placeholder {
+  color: #ababab;
+}
+
+/* Drag handle for weekly ToDos height */
+
+.week-todo-resize-handle {
+  grid-column: 2 / -1;
+  grid-row: 2;
+  align-self: end;
+  height: 8px;
+  margin-bottom: -4px;
+  cursor: row-resize;
+  z-index: 10;
+  background: transparent;
+}
+
+.week-todo-resize-handle:hover {
+  background: rgba(73, 75, 124, 0.08);
+}
+
+/* Scrollable timeline */
+
+.week-scroll {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.week-grid {
+  display: grid;
+  grid-template-columns: 35px repeat(7, minmax(0, 1fr));
+  min-height: 746px;
+}
+
+.week-time-column {
+  position: relative;
+  height: 1008px;
+  grid-column: 1;
+}
+
+.week-time-label {
+  position: absolute;
+  right: 4px;
+  transform: translateY(-2px);
+  color: #878787;
+  font-size: 8px;
+  line-height: 10px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+/* Day columns */
+
+.week-day-column {
+  position: relative;
+  height: 1008px;
+  border-right: 1px solid #f0f2f6;
+  border-bottom: 1px solid #f0f2f6;
+  background: #ffffff;
+  cursor: crosshair;
+  overflow: hidden;
+}
+
+.week-day-column.first {
+  border-left: 1px solid #f0f2f6;
+  border-radius: 0 0 0 10px;
+}
+
+.week-day-column.last {
+  border-radius: 0 0 10px 0;
+}
+
+.week-day-column:hover {
+  background: rgba(240, 242, 246, 0.25);
+}
+
+/* Hour grid */
+
+.week-hour-area {
+  position: relative;
+  height: 1008px;
+}
+
+.week-hour-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid #f0f2f6;
+  pointer-events: none;
+}
+
+/* Events */
+
+.week-event {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: 0;
+  background: #e1f7ff;
+  border-left: 4px solid #49b7ff;
+  padding: 5px 7px;
+  cursor: pointer;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.week-event-time {
+  color: #49b7ff;
+  font-size: 8px;
+  line-height: 10px;
+  font-weight: 500;
+}
+
+.week-event-title {
+  color: #49b7ff;
+  font-size: 8px;
+  line-height: 10px;
+  font-weight: 600;
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .week-page {
+    padding: 24px 20px 32px 0;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .week-header {
+    padding-left: 20px;
+    min-height: 130px;
+  }
+
+  .week-goals-area,
+  .week-mindset-title,
+  .week-mindset-input {
+    position: static;
+  }
+
+  .week-goals-area {
+    margin-top: 16px;
+  }
+
+  .week-nav {
+    position: static;
+    margin-left: 20px;
+    margin-bottom: 16px;
+  }
+
+  .week-goal-check-grid {
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    width: 100%;
+    row-gap: 12px;
+  }
+
+  .week-mindset-input {
+    width: 100%;
+  }
+
+  .week-scroll {
+    overflow-x: auto;
+  }
+
+  .week-grid,
+  .week-calendar-section,
+  .week-fixed-header {
+    grid-template-columns: 35px repeat(7, minmax(160px, 1fr));
+  }
+}
