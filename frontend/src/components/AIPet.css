@@ -1,0 +1,197 @@
+.aipet-wrap {
+  position: relative;
+}
+
+.aipet-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 320px;
+  height: 440px;
+  background: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(73, 75, 124, 0.14);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  overflow: hidden;
+  font-family: Inter, 'DM Sans', sans-serif;
+}
+
+/* Header */
+
+.aipet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid #f0f2f6;
+  flex-shrink: 0;
+}
+
+.aipet-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #494b7c;
+  letter-spacing: 0.02em;
+}
+
+.aipet-title-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.aipet-close {
+  border: none;
+  background: transparent;
+  color: #ababab;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aipet-close:hover {
+  color: #4c4c4c;
+}
+
+/* Messages */
+
+.aipet-messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 14px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.aipet-msg {
+  max-width: 86%;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.aipet-msg--assistant {
+  background: #f0f2f6;
+  color: #4c4c4c;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.aipet-msg--user {
+  background: #e7e1ff;
+  color: #494b7c;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.aipet-msg--loading {
+  color: #ababab;
+  font-style: italic;
+}
+
+/* Chips */
+
+.aipet-chips {
+  display: flex;
+  gap: 6px;
+  padding: 2px 14px 10px;
+  flex-shrink: 0;
+}
+
+.aipet-chip {
+  border: 1px solid #ffffff;
+  background: #fafafa;
+  color: #494b7c;
+  font-size: 11px;
+  font-family: Inter, 'DM Sans', sans-serif;
+  padding: 5px 13px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.aipet-chip:hover {
+  background: #FFEFEF;
+  border-color: #c9cef0;
+}
+
+/* Input row */
+
+.aipet-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px 14px;
+  border-top: 1px solid #f0f2f6;
+  flex-shrink: 0;
+}
+
+.aipet-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #d6dbe5;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: Inter, 'DM Sans', sans-serif;
+  color: #4c4c4c;
+  outline: none;
+}
+
+.aipet-input:focus {
+  border-color: #9caaf9;
+  background: #ffffff;
+}
+
+.aipet-input::placeholder {
+  color: #ababab;
+}
+
+.aipet-input:disabled {
+  opacity: 0.6;
+}
+
+.aipet-send {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: #494b7c;
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  transition: background 0.12s;
+}
+
+.aipet-send:hover:not(:disabled) {
+  background: #3b3d6b;
+}
+
+.aipet-send:disabled {
+  background: #d6dbe5;
+  cursor: default;
+}

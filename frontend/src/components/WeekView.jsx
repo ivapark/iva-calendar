@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import leftArrow from '../assets/LeftArrow.svg';
 import {
   DAYS,
   MONTHS,
@@ -6,6 +7,7 @@ import {
   weekStart,
   getClickedTime,
   addMinutesToTime,
+  hexToRgba,
 } from '../utils.js';
 import './WeekView.css';
 
@@ -299,7 +301,7 @@ export default function WeekView({
             onClick={() => navigate(-1)}
             aria-label="Previous week"
           >
-            ◀
+            <img src={leftArrow} alt="" />
           </button>
 
           <span className="week-month-name">
@@ -311,7 +313,7 @@ export default function WeekView({
             onClick={() => navigate(1)}
             aria-label="Next week"
           >
-            ▶
+            <img src={leftArrow} alt="" style={{ transform: 'scaleX(-1)' }} />
           </button>
 
           <button className="week-today-btn" onClick={goToday}>
@@ -460,6 +462,7 @@ export default function WeekView({
                         36
                       );
 
+                      const evColor = event.color || '#49b7ff';
                       return (
                         <div
                           key={event.id}
@@ -467,16 +470,18 @@ export default function WeekView({
                           style={{
                             top: `${top}px`,
                             height: `${height}px`,
+                            borderLeftColor: evColor,
+                            background: hexToRgba(evColor, 0.12),
                           }}
                           onClick={(clickEvent) => {
                             clickEvent.stopPropagation();
                             openEditEvent(event);
                           }}
                         >
-                          <div className="week-event-time">
+                          <div className="week-event-time" style={{ color: evColor }}>
                             {formatTime(event.start)}
                           </div>
-                          <div className="week-event-title">{event.title}</div>
+                          <div className="week-event-title" style={{ color: evColor }}>{event.title}</div>
                         </div>
                       );
                     })}

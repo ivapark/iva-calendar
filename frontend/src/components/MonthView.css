@@ -87,7 +87,7 @@
   overflow-x: hidden;
   font-size: 10px;
   line-height: 20px;
-  color: #565151;
+  color: #878787;
   padding: 0;
   font-family: Inter, 'DM Sans', sans-serif;
   scrollbar-width: thin;
@@ -141,7 +141,7 @@
   overflow-x: hidden;
   font-size: 12px;
   line-height: 20px;
-  color: #565151;
+  color: #878787;
   padding: 0 0 3px;
   font-family: Inter, 'DM Sans', sans-serif;
   scrollbar-width: thin;
@@ -184,7 +184,7 @@
   top: -153px;
   height: 32px;
   display: grid;
-  grid-template-columns: 24px 145px 24px 74px;
+  grid-template-columns: 24px 200px 24px 74px;
   align-items: center;
   column-gap: 12px;
   width: fit-content;
@@ -207,16 +207,24 @@
 .month-arrow {
   border: none;
   background: transparent;
-  color: #ffbca0;
-  font-size: 17px;
-  line-height: 1;
   cursor: pointer;
   padding: 0;
   width: 24px;
-  height: 32px;
+  height: 24px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.month-arrow img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.month-arrow:hover {
+  background: rgba(255, 227, 227, 0.2);
 }
 
 .month-name-large {

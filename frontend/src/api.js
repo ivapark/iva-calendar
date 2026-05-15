@@ -1,9 +1,26 @@
+import { supabase } from './supabaseClient.js';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
+async function authHeaders() {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
 async function request(path, options = {}) {
+  const headers = await authHeaders();
+
   const response = await fetch(`${API_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-    ...options
+    ...options,
+    headers: {
+      ...headers,
+      ...(options.headers || {}),
+    },
   });
 
   if (!response.ok) {
@@ -18,10 +35,11 @@ async function request(path, options = {}) {
 export const api = {
   getState: () => request('/state'),
   createEvent: (event) => request('/events', { method: 'POST', body: JSON.stringify(event) }),
-  updateEvent: (id, event) => request(`/events/${id}`, { method: 'PUT', body: JSON.stringify(event) }),
+  updateEvent: (id, event) => request(`/events/${id}`, { method: 'PATCH', body: JSON.stringify(event) }),
   deleteEvent: (id) => request(`/events/${id}`, { method: 'DELETE' }),
   createTodo: (todo) => request('/todos', { method: 'POST', body: JSON.stringify(todo) }),
-  updateTodo: (id, data) => request(`/todos/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  updateTodo: (id, todo) => request(`/todos/${id}`, { method: 'PATCH', body: JSON.stringify(todo) }),
   deleteTodo: (id) => request(`/todos/${id}`, { method: 'DELETE' }),
-  saveEntry: (type, key, value) => request(`/entries/${type}/${encodeURIComponent(key)}`, { method: 'PUT', body: JSON.stringify({ value }) })
+  saveEntry: (type, key, value) => request('/entries', { method: 'POST', body: JSON.stringify({ type, key, value }) }),
+  chatWithAI: (body) => request('/ai/chat', { method: 'POST', body: JSON.stringify(body) })
 };

@@ -33,7 +33,7 @@
   font-size: 24px;
   line-height: 29px;
   font-weight: 400;
-  color: #ffbca0;
+  color: #BC5376;
 }
 
 .year-right {
@@ -140,7 +140,7 @@
   overflow-x: hidden;
   font-size: 10px;
   line-height: 20px;
-  color: #565151;
+  color: #878787;
   padding: 0;
   font-family: Inter, 'DM Sans', sans-serif;
   scrollbar-width: thin;

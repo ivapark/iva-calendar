@@ -1,7 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { api } from './api.js';
 import { dateKey } from './utils.js';
+
+
+import { supabase } from './supabaseClient.js';
+import AuthButton from './components/AuthButton.jsx';
 
 
 import YearView from './components/YearView.jsx';
@@ -9,19 +13,22 @@ import MonthView from './components/MonthView.jsx';
 import WeekView from './components/WeekView.jsx';
 import DayView from './components/DayView.jsx';
 import JournalView from './components/JournalView.jsx';
+import AIPet from './components/AIPet.jsx';
 
 
-import chatIcon from './assets/ChatIcon.svg';
+import chatIcon from './assets/FigPet.svg';
 import journalIcon from './assets/JournalIcon.svg';
 import searchIcon from './assets/SearchIcon.svg';
 import settingIcon from './assets/SettingIcon.svg';
 
+import { Chrome } from '@uiw/react-color';
 import './styles.css';
 
 function App() {
   const [view, setView] = useState('year');
   const [today] = useState(new Date());
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [session, setSession] = useState(null);
 
   const [events, setEvents] = useState([]);
   const [todos, setTodos] = useState([]);
@@ -61,6 +68,20 @@ function App() {
 
     document.documentElement.style.setProperty('--ev-bg', `rgba(${r},${g},${b},0.1)`);
   }, [color]);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const isToday = (y, m, d) => {
     return (
@@ -198,6 +219,20 @@ function App() {
   }
 
 
+  const recentColors = useMemo(() => {
+    const seen = new Set();
+    const colors = [];
+    for (const ev of [...events].reverse()) {
+      const c = ev.color?.trim();
+      if (c && !seen.has(c)) {
+        seen.add(c);
+        colors.push(c);
+        if (colors.length >= 9) break;
+      }
+    }
+    return colors;
+  }, [events]);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setSearchOpen] = useState(false);
 
@@ -312,12 +347,26 @@ function App() {
     return <div className="loading">Loading calendar...</div>;
   }
 
+  if (!session) {
+    return (
+      <div className="auth-screen">
+        <div className="auth-card">
+          <h1>Goal Calendar</h1>
+          <p>Sign in to save your calendar, journal, goals, and todos.</p>
+          <AuthButton session={session} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="topbar">
         <div />
 
         <div className="top-actions">
+          <AuthButton session={session} />
+
           <SearchBar
             query={searchQuery}
             setQuery={setSearchQuery}
@@ -345,12 +394,13 @@ function App() {
             <img className="top-icon" src={journalIcon} alt="" />
           </button>
 
-          <button
-            className="iconbtn"
-            title="Chat"
-          >
-            <img className="top-icon" src={chatIcon} alt="" />
-          </button>
+          <AIPet
+            chatIcon={chatIcon}
+            currentDate={currentDate}
+            journals={journals}
+            goals={goals}
+            mindsets={mindsets}
+          />
 
           <button
             className="iconbtn"
@@ -473,6 +523,7 @@ function App() {
           event={modalEvent}
           defaults={modalDefaults}
           currentDate={currentDate}
+          recentColors={recentColors}
           onClose={() => setModalOpen(false)}
           onSave={saveEvent}
           onDelete={deleteEvent}
@@ -614,7 +665,7 @@ function parseScopeKey(key) {
 
   return null;
 }
-function EventModal({ event, defaults = {}, currentDate, onClose, onSave, onDelete }) {
+function EventModal({ event, defaults = {}, currentDate, recentColors = [], onClose, onSave, onDelete }) {
   const defaultDate = dateKey(
     currentDate.getFullYear(),
     currentDate.getMonth(),
@@ -626,13 +677,37 @@ function EventModal({ event, defaults = {}, currentDate, onClose, onSave, onDele
   const [start, setStart] = useState(event?.start || defaults.start || '09:00');
   const [end, setEnd] = useState(event?.end || defaults.end || '10:00');
   const [note, setNote] = useState(event?.note || defaults.note || '');
+  const [eventColor, setEventColor] = useState(
+    event?.color || defaults.color || '#898A8D'
+  );
   const [saving, setSaving] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const pickerRef = useRef(null);
+
+  useEffect(() => {
+    if (!showPicker) return;
+    function handleClick(e) {
+      if (pickerRef.current && !pickerRef.current.contains(e.target)) {
+        setShowPicker(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showPicker]);
 
   async function submit() {
     if (!title.trim()) return;
 
     setSaving(true);
-    await onSave({ title, date, start, end, note });
+    await onSave({
+      title,
+      date,
+      start,
+      end,
+      note,
+      color: eventColor,
+    });
+    
     setSaving(false);
   }
 
@@ -680,6 +755,66 @@ function EventModal({ event, defaults = {}, currentDate, onClose, onSave, onDele
           placeholder="Notes optional"
           onChange={(event) => setNote(event.target.value)}
         />
+
+        <div className="event-color-section" ref={pickerRef}>
+          <div className="event-color-label">Event Color</div>
+
+          <div className="event-color-picker-row">
+            <div
+              className="event-color-preview"
+              style={{ backgroundColor: eventColor }}
+            />
+
+            <input
+              className="event-color-hex-input"
+              value={eventColor}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (/^#[0-9a-fA-F]{0,6}$/.test(v)) setEventColor(v);
+              }}
+              placeholder="#898A8D"
+            />
+
+            <button
+              className="event-color-wheel-btn"
+              onClick={() => setShowPicker((v) => !v)}
+              aria-label="Open color picker"
+            >
+              🎨
+            </button>
+          </div>
+
+          {showPicker && (
+            <div className="event-color-popup">
+              <Chrome
+                color={eventColor}
+                onChange={(c) => setEventColor(c.hex)}
+                style={{
+                  boxShadow: 'none',
+                  border: 'none',
+                  borderRadius: '14px',
+                  background: '#ffffff',
+                  overflow: 'hidden',
+                }}
+              />
+            </div>
+          )}
+
+          {recentColors.length > 0 && (
+            <div className="recent-color-row">
+              {recentColors.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  className={`recent-color-dot ${eventColor === c ? 'selected' : ''}`}
+                  style={{ backgroundColor: c }}
+                  onClick={() => setEventColor(c)}
+                  aria-label={`Choose ${c}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="mact">
           {event && (

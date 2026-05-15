@@ -1,5 +1,5 @@
 import React from 'react';
-import { MONTHS_SHORT } from '../utils.js';
+import { MONTHS_SHORT, hexToRgba } from '../utils.js';
 import './YearView.css';
 
 export default function YearView({
@@ -141,11 +141,22 @@ export default function YearView({
 
                       {hasEvent && (
                         <div className="year-event-list">
-                          {dayEvents.slice(0, 3).map((event) => (
-                            <span key={event.id} className="year-event-chip">
-                              {event.title}
-                            </span>
-                          ))}
+                          {dayEvents.slice(0, 3).map((event) => {
+                            const evColor = event.color || '#49b7ff';
+                            return (
+                              <span
+                                key={event.id}
+                                className="year-event-chip"
+                                style={{
+                                  borderLeftColor: evColor,
+                                  background: hexToRgba(evColor, 0.12),
+                                  color: evColor,
+                                }}
+                              >
+                                {event.title}
+                              </span>
+                            );
+                          })}
                         </div>
                       )}
                     </button>

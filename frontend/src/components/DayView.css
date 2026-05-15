@@ -23,7 +23,7 @@
   top: 0;
   height: 32px;
   display: grid;
-  grid-template-columns: 24px 160px 24px 74px;
+  grid-template-columns: 24px 220px 24px 74px;
   align-items: center;
   column-gap: 12px;
   width: fit-content;
@@ -33,16 +33,24 @@
 .day-arrow {
   border: none;
   background: transparent;
-  color: #ffbca0;
-  font-size: 17px;
-  line-height: 1;
   cursor: pointer;
   padding: 0;
   width: 24px;
-  height: 32px;
+  height: 24px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.day-arrow img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.day-arrow:hover {
+  background: rgba(255, 188, 160, 0.15);
 }
 
 .day-date-title {

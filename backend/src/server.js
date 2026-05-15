@@ -1,7 +1,60 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import Anthropic from '@anthropic-ai/sdk';
 import { initDb, all, get, run } from './db.js';
+import eventsRouter from '../routes/events.js';
+
+const anthropic = process.env.ANTHROPIC_API_KEY
+  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  : null;
+
+const AI_SYSTEM_PROMPT = `You are a warm but practical reflection and goal-planning assistant inside a personal calendar and journal app. Help the user reflect on journal thoughts, notice patterns, clarify goals, and turn vague feelings into concrete next steps. Do not diagnose mental health conditions. Do not pretend to be a therapist. Ask thoughtful questions when useful. Keep responses concise and friendly — 2–4 sentences unless the user asks for more. You have access to the user's journal entries, goals, and mindsets as context. Reference them naturally when relevant, but never dump raw data back verbatim.`;
+
+function buildContextSummary({ currentDate, journals = {}, goals = {}, mindsets = {} }) {
+  const lines = [];
+
+  if (currentDate) lines.push(`Today: ${currentDate}`);
+
+  const recentJournals = Object.entries(journals)
+    .filter(([, v]) => v?.trim())
+    .sort(([a], [b]) => b.localeCompare(a))
+    .slice(0, 5);
+
+  if (recentJournals.length > 0) {
+    lines.push('\nRecent journal entries:');
+    for (const [key, value] of recentJournals) {
+      const preview = value.trim().slice(0, 200);
+      lines.push(`  [${key}]: ${preview}${value.trim().length > 200 ? '...' : ''}`);
+    }
+  }
+
+  const relevantGoals = Object.entries(goals).filter(([, v]) => v?.trim()).slice(0, 4);
+  for (const [key, value] of relevantGoals) {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        const items = parsed.filter((g) => g.text).map((g) => `${g.done ? '✓' : '○'} ${g.text}`);
+        if (items.length > 0) {
+          lines.push(`\nGoals (${key}):`);
+          items.forEach((item) => lines.push(`  ${item}`));
+        }
+      }
+    } catch {
+      lines.push(`\nGoal (${key}): ${value.trim().slice(0, 100)}`);
+    }
+  }
+
+  const recentMindsets = Object.entries(mindsets).filter(([, v]) => v?.trim()).slice(0, 3);
+  if (recentMindsets.length > 0) {
+    lines.push('\nMindsets/intentions:');
+    for (const [key, value] of recentMindsets) {
+      lines.push(`  ${key}: "${value.trim()}"`);
+    }
+  }
+
+  return lines.join('\n') || 'No context available yet.';
+}
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -9,6 +62,7 @@ const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 
 app.use(cors({ origin: CLIENT_ORIGIN }));
 app.use(express.json());
+app.use('/events', eventsRouter);
 
 const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 const allowedEntryTypes = new Set(['journals', 'goals', 'mindsets']);
@@ -19,7 +73,7 @@ app.get('/api/health', (_req, res) => {
 
 app.get('/api/state', async (_req, res, next) => {
   try {
-    const events = await all('SELECT id, title, date, start, end, note FROM events ORDER BY date, start');
+    const events = await all('SELECT id, title, date, start, end, note, color FROM events ORDER BY date, start');
     const todos = await all('SELECT id, date, text, done FROM todos ORDER BY created_at');
     const entries = await all('SELECT type, entry_key, value FROM text_entries');
 
@@ -43,15 +97,15 @@ app.get('/api/state', async (_req, res, next) => {
 
 app.post('/api/events', async (req, res, next) => {
   try {
-    const { title, date, start = '', end = '', note = '' } = req.body;
+    const { title, date, start = '', end = '', note = '', color = '' } = req.body;
     if (!title?.trim() || !date) {
       return res.status(400).json({ error: 'Event title and date are required.' });
     }
 
-    const event = { id: makeId(), title: title.trim(), date, start, end, note };
+    const event = { id: makeId(), title: title.trim(), date, start, end, note, color };
     await run(
-      'INSERT INTO events (id, title, date, start, end, note) VALUES (?, ?, ?, ?, ?, ?)',
-      [event.id, event.title, event.date, event.start, event.end, event.note]
+      'INSERT INTO events (id, title, date, start, end, note, color) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [event.id, event.title, event.date, event.start, event.end, event.note, event.color]
     );
     res.status(201).json(event);
   } catch (err) {
@@ -61,20 +115,20 @@ app.post('/api/events', async (req, res, next) => {
 
 app.put('/api/events/:id', async (req, res, next) => {
   try {
-    const { title, date, start = '', end = '', note = '' } = req.body;
+    const { title, date, start = '', end = '', note = '', color = '' } = req.body;
     if (!title?.trim() || !date) {
       return res.status(400).json({ error: 'Event title and date are required.' });
     }
 
     const result = await run(
       `UPDATE events
-       SET title = ?, date = ?, start = ?, end = ?, note = ?, updated_at = CURRENT_TIMESTAMP
+       SET title = ?, date = ?, start = ?, end = ?, note = ?, color = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [title.trim(), date, start, end, note, req.params.id]
+      [title.trim(), date, start, end, note, color, req.params.id]
     );
 
     if (!result.changes) return res.status(404).json({ error: 'Event not found.' });
-    res.json({ id: req.params.id, title: title.trim(), date, start, end, note });
+    res.json({ id: req.params.id, title: title.trim(), date, start, end, note, color });
   } catch (err) {
     next(err);
   }
@@ -145,6 +199,42 @@ app.put('/api/entries/:type/:key', async (req, res, next) => {
       [type, key, value]
     );
     res.json({ type, key, value });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/ai/chat', async (req, res, next) => {
+  try {
+    const { message, history = [], context = {} } = req.body;
+
+    if (!message?.trim()) {
+      return res.status(400).json({ error: 'Message is required.' });
+    }
+
+    if (!anthropic) {
+      return res.status(503).json({ error: 'AI service is not configured. Add ANTHROPIC_API_KEY to .env.' });
+    }
+
+    const contextSummary = buildContextSummary(context);
+
+    const claudeMessages = [
+      ...history.map((m) => ({ role: m.role, content: m.content })),
+      {
+        role: 'user',
+        content: `${message.trim()}\n\n---\nMy calendar context:\n${contextSummary}`,
+      },
+    ];
+
+    const response = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 512,
+      system: AI_SYSTEM_PROMPT,
+      messages: claudeMessages,
+    });
+
+    const reply = response.content[0]?.text ?? "I had trouble thinking of a response. Try again?";
+    res.json({ reply });
   } catch (err) {
     next(err);
   }

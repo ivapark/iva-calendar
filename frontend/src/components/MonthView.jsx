@@ -1,5 +1,6 @@
 import React from 'react';
 import { MONTHS } from '../utils.js';
+import leftArrow from '../assets/LeftArrow.svg';
 import './MonthView.css';
 
 export default function MonthView({
@@ -96,7 +97,7 @@ export default function MonthView({
             onClick={() => navigate(-1)}
             aria-label="Previous month"
           >
-            ◀
+            <img src={leftArrow} alt="" />
           </button>
 
           <span className="month-name-large">
@@ -108,7 +109,7 @@ export default function MonthView({
             onClick={() => navigate(1)}
             aria-label="Next month"
           >
-            ▶
+            <img src={leftArrow} alt="" style={{ transform: 'scaleX(-1)' }} />
           </button>
 
           <button className="month-today-btn" onClick={goToday}>

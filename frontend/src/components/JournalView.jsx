@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import leftArrow from '../assets/LeftArrow.svg';
 import { MONTHS, dateKey } from '../utils.js';
 import './JournalView.css';
 
@@ -116,7 +117,7 @@ export default function JournalView({
             onClick={() => moveDay(-1)}
             aria-label="Previous day"
           >
-            ◀
+            <img src={leftArrow} alt="" />
           </button>
 
           <span className="journal-date-title">
@@ -128,7 +129,7 @@ export default function JournalView({
             onClick={() => moveDay(1)}
             aria-label="Next day"
           >
-            ▶
+            <img src={leftArrow} alt="" style={{ transform: 'scaleX(-1)' }} />
           </button>
 
           <button className="journal-today-btn" onClick={handleToday}>

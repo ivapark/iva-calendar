@@ -1,10 +1,12 @@
 import React, { useRef, useState } from 'react';
+import leftArrow from '../assets/LeftArrow.svg';
 import {
   MONTHS,
   dateKey,
   getScopeKey,
   getClickedTime,
   addMinutesToTime,
+  hexToRgba,
 } from '../utils.js';
 import './DayView.css';
 
@@ -222,7 +224,7 @@ export default function DayView({
             onClick={() => navigate(-1)}
             aria-label="Previous day"
           >
-            ◀
+            <img src={leftArrow} alt="" />
           </button>
 
           <span className="day-date-title">
@@ -234,7 +236,7 @@ export default function DayView({
             onClick={() => navigate(1)}
             aria-label="Next day"
           >
-            ▶
+            <img src={leftArrow} alt="" style={{ transform: 'scaleX(-1)' }} />
           </button>
 
           <button className="day-today-btn" onClick={goToday}>
@@ -354,20 +356,26 @@ export default function DayView({
                       48
                     );
 
+                    const evColor = event.color || '#49b7ff';
                     return (
                       <div
                         key={event.id}
                         className="day-event"
-                        style={{ top: `${top}px`, height: `${height}px` }}
+                        style={{
+                          top: `${top}px`,
+                          height: `${height}px`,
+                          borderLeftColor: evColor,
+                          background: hexToRgba(evColor, 0.12),
+                        }}
                         onClick={(clickEvent) => {
                           clickEvent.stopPropagation();
                           openEditEvent(event);
                         }}
                       >
-                        <div className="day-event-time">
+                        <div className="day-event-time" style={{ color: evColor }}>
                           {formatEventTime(event.start)}
                         </div>
-                        <div className="day-event-title">{event.title}</div>
+                        <div className="day-event-title" style={{ color: evColor }}>{event.title}</div>
                       </div>
                     );
                   })}

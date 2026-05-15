@@ -34,6 +34,15 @@ export function getClickedTime(e, pixelsPerHour) {
   return clampHourMinute(Math.floor(rawMinutes / 30) * 30);
 }
 
+export function hexToRgba(hex, alpha) {
+  const h = hex.replace('#', '');
+  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export function getScopeKey(view, date) {
   if (view === 'year') return `y${date.getFullYear()}`;
   if (view === 'month') return `m${date.getFullYear()}-${date.getMonth()}`;

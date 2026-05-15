@@ -44,10 +44,13 @@ export async function initDb() {
       start TEXT,
       end TEXT,
       note TEXT,
+      color TEXT DEFAULT '',
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  await run(`ALTER TABLE events ADD COLUMN color TEXT DEFAULT ''`).catch(() => {});
 
   await run(`
     CREATE TABLE IF NOT EXISTS todos (
