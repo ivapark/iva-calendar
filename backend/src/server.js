@@ -58,9 +58,15 @@ function buildContextSummary({ currentDate, journals = {}, goals = {}, mindsets 
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://iva-calendar-frontend.vercel.app',
+];
 
-app.use(cors({ origin: CLIENT_ORIGIN }));
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
 app.use(express.json());
 app.use('/events', eventsRouter);
 
@@ -204,8 +210,8 @@ app.put('/api/entries/:type/:key', async (req, res, next) => {
   }
 });
 
-app.post('/ai/chat', async (req, res, next) => {
-  try {
+app.post('/api/ai/chat', async (req, res, next) => {
+    try {
     const { message, history = [], context = {} } = req.body;
 
     if (!message?.trim()) {
