@@ -214,7 +214,9 @@ function App() {
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
   }
 
-  async function saveEntry(type, key, value) {
+  const saveTimersRef = useRef({});
+
+  function saveEntry(type, key, value) {
     if (type === 'journals') {
       setJournals((prev) => ({ ...prev, [key]: value }));
     }
@@ -227,7 +229,11 @@ function App() {
       setMindsets((prev) => ({ ...prev, [key]: value }));
     }
 
-    await api.saveEntry(type, key, value);
+    const timerKey = `${type}:${key}`;
+    clearTimeout(saveTimersRef.current[timerKey]);
+    saveTimersRef.current[timerKey] = setTimeout(() => {
+      api.saveEntry(type, key, value).catch((err) => setError(err.message));
+    }, 600);
   }
 
 
