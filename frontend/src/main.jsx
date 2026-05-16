@@ -5,7 +5,7 @@ import { dateKey } from './utils.js';
 
 
 import { supabase } from './supabaseClient.js';
-import AuthButton from './components/AuthButton.jsx';
+import Home from './components/Home.jsx';
 
 
 import YearView from './components/YearView.jsx';
@@ -29,6 +29,8 @@ function App() {
   const [today] = useState(new Date());
   const [currentDate, setCurrentDate] = useState(new Date());
   const [session, setSession] = useState(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsRef = useRef(null);
 
   const [events, setEvents] = useState([]);
   const [todos, setTodos] = useState([]);
@@ -81,6 +83,16 @@ function App() {
     });
 
     return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (settingsRef.current && !settingsRef.current.contains(event.target)) {
+        setSettingsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const isToday = (y, m, d) => {
@@ -348,15 +360,7 @@ function App() {
   }
 
   if (!session) {
-    return (
-      <div className="auth-screen">
-        <div className="auth-card">
-          <h1>Goal Calendar</h1>
-          <p>Sign in to save your calendar, journal, goals, and todos.</p>
-          <AuthButton session={session} />
-        </div>
-      </div>
-    );
+    return <Home />;
   }
 
   return (
@@ -365,8 +369,6 @@ function App() {
         <div />
 
         <div className="top-actions">
-          <AuthButton session={session} />
-
           <SearchBar
             query={searchQuery}
             setQuery={setSearchQuery}
@@ -402,13 +404,29 @@ function App() {
             mindsets={mindsets}
           />
 
-          <button
-            className="iconbtn"
-            onClick={() => alert('Settings coming soon!')}
-            title="Settings"
-          >
-            <img className="top-icon setting-icon" src={settingIcon} alt="" />
-          </button>
+          <div className="settings-wrap" ref={settingsRef}>
+            <button
+              className="iconbtn"
+              onClick={() => setSettingsOpen((prev) => !prev)}
+              title="Settings"
+            >
+              <img className="top-icon setting-icon" src={settingIcon} alt="" />
+            </button>
+
+            {settingsOpen && (
+              <div className="settings-dropdown">
+                <button
+                  className="settings-signout"
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    setSettingsOpen(false);
+                  }}
+                >
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
 
           <div className="view-tabs">
             {['year', 'month', 'week', 'day'].map((item) => (

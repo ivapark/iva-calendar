@@ -1,0 +1,15 @@
+.auth-btn {
+  padding: 12px 40px;
+  background: #BC5275;
+  color: #fff5f5;
+  border: none;
+  border-radius: 20px;
+  font-family: Inter, 'DM Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.auth-btn:hover {
+  background: #a8455f;
+}

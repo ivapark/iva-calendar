@@ -1,0 +1,44 @@
+.home-screen {
+  width: 100%;
+  height: 100%;
+  background: #FCE0E0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-title {
+  font-family: 'Itim', cursive;
+  font-size: 96px;
+  font-weight: 400;
+  color: #BC5275;
+  line-height: 1.1;
+  margin-bottom: 24px;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.33, 0, 0.66, 0);
+  }
+  50% {
+    transform: translateY(-20px);
+    animation-timing-function: cubic-bezier(0.33, 1, 0.66, 1);
+  }
+}
+
+.home-pet {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  margin-bottom: 28px;
+  animation: bounce 1.6s infinite;
+}
+
+.home-subtitle {
+  font-family: Inter, 'DM Sans', sans-serif;
+  font-size: 16px;
+  color: #6b3048;
+  margin-bottom: 24px;
+}

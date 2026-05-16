@@ -517,6 +517,42 @@ button {
   color: #878787;
 }
 
+/* Settings dropdown */
+
+.settings-wrap {
+  position: relative;
+}
+
+.settings-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  padding: 4px;
+  z-index: 100;
+  min-width: 120px;
+}
+
+.settings-signout {
+  width: 100%;
+  padding: 7px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 7px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: #c00;
+  cursor: pointer;
+  text-align: left;
+}
+
+.settings-signout:hover {
+  background: #fff0f0;
+}
+
 /* Responsive */
 
 @media (max-width: 760px) {
