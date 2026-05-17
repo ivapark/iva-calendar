@@ -39,6 +39,7 @@ export async function initDb() {
   await run(`
     CREATE TABLE IF NOT EXISTS events (
       id TEXT PRIMARY KEY,
+      user_id TEXT,
       title TEXT NOT NULL,
       date TEXT NOT NULL,
       start TEXT,
@@ -49,12 +50,13 @@ export async function initDb() {
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
-
   await run(`ALTER TABLE events ADD COLUMN color TEXT DEFAULT ''`).catch(() => {});
+  await run(`ALTER TABLE events ADD COLUMN user_id TEXT`).catch(() => {});
 
   await run(`
     CREATE TABLE IF NOT EXISTS todos (
       id TEXT PRIMARY KEY,
+      user_id TEXT,
       date TEXT NOT NULL,
       text TEXT NOT NULL,
       done INTEGER DEFAULT 0,
@@ -62,14 +64,40 @@ export async function initDb() {
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
+  await run(`ALTER TABLE todos ADD COLUMN user_id TEXT`).catch(() => {});
 
-  await run(`
-    CREATE TABLE IF NOT EXISTS text_entries (
-      type TEXT NOT NULL,
-      entry_key TEXT NOT NULL,
-      value TEXT DEFAULT '',
-      updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      PRIMARY KEY(type, entry_key)
-    )
-  `);
+  // Rebuild text_entries with (user_id, type, entry_key) as PK if needed
+  const cols = await all(`PRAGMA table_info(text_entries)`);
+  const hasUserId = cols.some((c) => c.name === 'user_id');
+
+  if (!hasUserId) {
+    await run(`
+      CREATE TABLE IF NOT EXISTS text_entries_new (
+        user_id TEXT NOT NULL DEFAULT '',
+        type TEXT NOT NULL,
+        entry_key TEXT NOT NULL,
+        value TEXT DEFAULT '',
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY(user_id, type, entry_key)
+      )
+    `);
+    // Copy existing orphan rows with empty user_id (will be claimed via /api/claim-data)
+    await run(`
+      INSERT OR IGNORE INTO text_entries_new (user_id, type, entry_key, value, updated_at)
+      SELECT '', type, entry_key, value, updated_at FROM text_entries
+    `).catch(() => {});
+    await run(`DROP TABLE text_entries`);
+    await run(`ALTER TABLE text_entries_new RENAME TO text_entries`);
+  } else {
+    await run(`
+      CREATE TABLE IF NOT EXISTS text_entries (
+        user_id TEXT NOT NULL DEFAULT '',
+        type TEXT NOT NULL,
+        entry_key TEXT NOT NULL,
+        value TEXT DEFAULT '',
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY(user_id, type, entry_key)
+      )
+    `);
+  }
 }

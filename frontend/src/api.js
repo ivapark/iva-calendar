@@ -33,6 +33,7 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  claimData: () => request('/api/claim-data', { method: 'POST' }),
   getState: () => request('/api/state'),
   createEvent: (event) => request('/api/events', { method: 'POST', body: JSON.stringify(event) }),
   updateEvent: (id, event) => request(`/api/events/${id}`, { method: 'PUT', body: JSON.stringify(event) }),

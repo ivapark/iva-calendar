@@ -49,16 +49,41 @@ function App() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.getState()
-      .then((state) => {
+    async function handleSession(session) {
+      setSession(session);
+
+      if (!session) {
+        setEvents([]);
+        setTodos([]);
+        setJournals({});
+        setGoals({});
+        setMindsets({});
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const state = await api.getState();
         setEvents(state.events || []);
         setTodos(state.todos || []);
         setJournals(state.journals || {});
         setGoals(state.goals || {});
         setMindsets(state.mindsets || {});
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+      } catch (err) {
+        console.error('[auth] getState failed:', err.message);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      handleSession(session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -70,20 +95,6 @@ function App() {
 
     document.documentElement.style.setProperty('--ev-bg', `rgba(${r},${g},${b},0.1)`);
   }, [color]);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   useEffect(() => {
     function handleClickOutside(event) {
